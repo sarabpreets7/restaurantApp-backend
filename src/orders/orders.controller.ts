@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { OrdersService } from './orders.service.js';
 import { CreateOrderDto } from './dto/create-order.dto.js';
 import { UpdateStatusDto } from './dto/update-status.dto.js';
+import { AdminGuard } from '../common/admin.guard.js';
 
 @Controller('orders')
 export class OrdersController {
@@ -12,6 +13,7 @@ export class OrdersController {
     return this.orders.create(dto);
   }
 
+  @UseGuards(AdminGuard)
   @Get()
   list() {
     return this.orders.list();
@@ -22,6 +24,7 @@ export class OrdersController {
     return this.orders.get(id);
   }
 
+  @UseGuards(AdminGuard)
   @Patch(':id/status')
   updateStatus(@Param('id') id: string, @Body() dto: UpdateStatusDto) {
     return this.orders.updateStatus(id, dto);

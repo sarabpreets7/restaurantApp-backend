@@ -1,6 +1,6 @@
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { Order } from '../common/types.js';
+import type { Order } from '../common/types.js';
 
 @WebSocketGateway({
   cors: true,

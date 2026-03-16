@@ -1,0 +1,39 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model MenuItem {
+  id           String   @id @default(cuid())
+  name         String
+  description  String
+  category     String
+  price        Float
+  dietary      String
+  imageUrl     String
+  prepMinutes  Int
+  available    Boolean
+  stock        Int
+  addOns       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Order {
+  id           String   @id @default(cuid())
+  lines        String
+  subtotal     Float
+  tax          Float
+  total        Float
+  status       String
+  customer     String
+  paymentRef   String?
+  version      Int
+  priceChanged Boolean?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

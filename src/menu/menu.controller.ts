@@ -1,9 +1,9 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Inject, Query } from '@nestjs/common';
 import { MenuService } from './menu.service.js';
 
 @Controller('menu')
 export class MenuController {
-  constructor(private readonly menu: MenuService) {}
+  constructor(@Inject(MenuService) private readonly menuService: MenuService) {}
 
   @Get()
   list(
@@ -13,10 +13,11 @@ export class MenuController {
     @Query('minPrice') minPrice?: string,
     @Query('maxPrice') maxPrice?: string
   ) {
-    return this.menu.list({
-      search,
-      category,
-      dietary,
+    const normalize = (v?: string) => (v != null && v.trim().length ? v : undefined);
+    return this.menuService.list({
+      search: normalize(search),
+      category: normalize(category),
+      dietary: normalize(dietary),
       minPrice: minPrice ? Number(minPrice) : undefined,
       maxPrice: maxPrice ? Number(maxPrice) : undefined
     });

@@ -1,5 +1,5 @@
 import { IsIn, IsString } from 'class-validator';
-import { OrderStatus } from '../../common/types.js';
+import type { OrderStatus } from '../../common/types.js';
 
 export class UpdateStatusDto {
   @IsString()

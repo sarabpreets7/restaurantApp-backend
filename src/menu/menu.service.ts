@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { MenuItem } from '../common/types.js';
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service.js';
+import type { MenuItem } from '../common/types.js';
 import { v4 as uuid } from 'uuid';
 
-const seedMenu = (): MenuItem[] => [
+const seedItems: Omit<MenuItem, 'id'>[] = [
   {
-    id: uuid(),
     name: 'Truffle Fries',
     description: 'Hand-cut fries with truffle oil and parmesan.',
     category: 'Appetizers',
@@ -13,11 +13,21 @@ const seedMenu = (): MenuItem[] => [
     imageUrl: '/images/truffle-fries.jpg',
     prepMinutes: 10,
     available: true,
-    stock: 20,
+    stock: 25,
     addOns: [{ id: 'ao1', label: 'Extra parmesan', price: 1.5 }]
   },
   {
-    id: uuid(),
+    name: 'Crispy Calamari',
+    description: 'Lemon aioli, pickled chilies.',
+    category: 'Appetizers',
+    price: 12,
+    dietary: [],
+    imageUrl: '/images/calamari.jpg',
+    prepMinutes: 9,
+    available: true,
+    stock: 18
+  },
+  {
     name: 'Smoked Tofu Bowl',
     description: 'Brown rice, seasonal veggies, tamari glaze.',
     category: 'Main Course',
@@ -26,10 +36,9 @@ const seedMenu = (): MenuItem[] => [
     imageUrl: '/images/tofu-bowl.jpg',
     prepMinutes: 18,
     available: true,
-    stock: 15
+    stock: 22
   },
   {
-    id: uuid(),
     name: 'Ribeye Steak',
     description: '12oz grilled ribeye with chimichurri.',
     category: 'Main Course',
@@ -38,14 +47,13 @@ const seedMenu = (): MenuItem[] => [
     imageUrl: '/images/ribeye.jpg',
     prepMinutes: 22,
     available: true,
-    stock: 10,
+    stock: 12,
     addOns: [
       { id: 'ao2', label: 'Add mushrooms', price: 3 },
       { id: 'ao3', label: 'Add shrimp', price: 6 }
     ]
   },
   {
-    id: uuid(),
     name: 'Molten Chocolate Cake',
     description: 'Served warm with vanilla bean gelato.',
     category: 'Desserts',
@@ -54,10 +62,9 @@ const seedMenu = (): MenuItem[] => [
     imageUrl: '/images/cake.jpg',
     prepMinutes: 12,
     available: true,
-    stock: 12
+    stock: 18
   },
   {
-    id: uuid(),
     name: 'Cold Brew',
     description: 'Single-origin, slow steeped.',
     category: 'Beverages',
@@ -66,46 +73,71 @@ const seedMenu = (): MenuItem[] => [
     imageUrl: '/images/cold-brew.jpg',
     prepMinutes: 2,
     available: true,
-    stock: 40
+    stock: 50
   }
 ];
 
 @Injectable()
-export class MenuService {
-  private menu: MenuItem[] = seedMenu();
+export class MenuService implements OnModuleInit {
+  constructor(private readonly prisma: PrismaService) {}
 
-  list(filters?: {
+  async onModuleInit() {
+    const count = await this.prisma.menuItem.count();
+    if (count === 0) {
+      await this.prisma.menuItem.createMany({
+        data: seedItems.map((i) => ({
+          ...i,
+          id: uuid(),
+          dietary: JSON.stringify(i.dietary),
+          addOns: JSON.stringify(i.addOns ?? [])
+        }))
+      });
+    }
+  }
+
+  async list(filters?: {
     search?: string;
     category?: string;
     dietary?: string;
     minPrice?: number;
     maxPrice?: number;
-  }): MenuItem[] {
-    const search = filters?.search?.toLowerCase();
-    return this.menu.filter((item) => {
-      const matchesSearch =
-        !search ||
-        item.name.toLowerCase().includes(search) ||
-        item.description.toLowerCase().includes(search);
-      const matchesCategory = !filters?.category || item.category === filters.category;
-      const matchesDietary =
-        !filters?.dietary || item.dietary.includes(filters.dietary as any);
-      const matchesMin = filters?.minPrice == null || item.price >= filters.minPrice;
-      const matchesMax = filters?.maxPrice == null || item.price <= filters.maxPrice;
-      return matchesSearch && matchesCategory && matchesDietary && matchesMin && matchesMax;
+  }): Promise<MenuItem[]> {
+    const items = await this.prisma.menuItem.findMany();
+    return items
+      .map<MenuItem>((i) => ({
+        ...i,
+        dietary: JSON.parse(i.dietary ?? '[]'),
+        addOns: i.addOns ? JSON.parse(i.addOns) : []
+      }))
+      .filter((item) => {
+        const search = filters?.search?.toLowerCase() ?? '';
+        const matchesSearch =
+          !search ||
+          item.name.toLowerCase().includes(search) ||
+          item.description.toLowerCase().includes(search);
+        const matchesCategory = !filters?.category || item.category === filters.category;
+        const matchesDietary =
+          !filters?.dietary || (item.dietary as string[]).includes(filters.dietary);
+        const matchesMin = filters?.minPrice == null || item.price >= filters.minPrice;
+        const matchesMax = filters?.maxPrice == null || item.price <= filters.maxPrice;
+        return matchesSearch && matchesCategory && matchesDietary && matchesMin && matchesMax;
+      });
+  }
+
+  async get(id: string): Promise<MenuItem | undefined> {
+    const item = await this.prisma.menuItem.findUnique({ where: { id } });
+    if (!item) return undefined;
+    return {
+      ...item,
+      dietary: JSON.parse(item.dietary ?? '[]'),
+      addOns: item.addOns ? JSON.parse(item.addOns) : []
+    };
+  }
+
+  async adjustStock(id: string, delta: number) {
+    await this.prisma.menuItem.update({
+      where: { id },
+      data: { stock: { increment: delta } }
     });
-  }
-
-  get(id: string): MenuItem | undefined {
-    return this.menu.find((m) => m.id === id);
-  }
-
-  adjustStock(id: string, delta: number) {
-    const item = this.get(id);
-    if (item) item.stock += delta;
-  }
-
-  reset(data?: MenuItem[]) {
-    this.menu = data ?? seedMenu();
   }
 }

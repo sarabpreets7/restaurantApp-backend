@@ -3,8 +3,9 @@ import { v4 as uuid } from 'uuid';
 import { MenuService } from '../menu/menu.service.js';
 import { CreateOrderDto } from './dto/create-order.dto.js';
 import { UpdateStatusDto } from './dto/update-status.dto.js';
-import { LineItem, Order, OrderStatus } from '../common/types.js';
+import type { Order, OrderStatus, LineItem } from '../common/types.js';
 import { OrdersGateway } from './orders.gateway.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 
 const TAX_RATE = 0.09;
 const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
@@ -17,97 +18,136 @@ const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly menu: MenuService, private readonly gateway: OrdersGateway) {}
+  constructor(
+    private readonly menu: MenuService,
+    private readonly gateway: OrdersGateway,
+    private readonly prisma: PrismaService
+  ) {}
 
-  private orders = new Map<string, Order>();
-
-  create(dto: CreateOrderDto): Order {
+  async create(dto: CreateOrderDto): Promise<Order> {
     if (!dto.lines?.length) {
       throw new BadRequestException('Order requires at least one line item.');
     }
 
-    const now = new Date().toISOString();
-    let subtotal = 0;
-    const lines: Array<LineItem & { unitPrice: number; addOnTotal: number }> = dto.lines.map(
-      (line) => {
-        const menuItem = this.menu.get(line.menuItemId);
-        if (!menuItem || !menuItem.available) {
-          throw new BadRequestException(`Item ${line.menuItemId} is unavailable.`);
-        }
-        if (menuItem.stock < line.quantity) {
-          throw new BadRequestException(`Not enough stock for ${menuItem.name}.`);
-        }
-        const addOnTotal =
-          line.addOnIds?.reduce((acc, id) => {
-            const addOn = menuItem.addOns?.find((a) => a.id === id);
-            if (!addOn) throw new BadRequestException(`Invalid add-on ${id} for ${menuItem.name}`);
-            return acc + addOn.price;
-          }, 0) ?? 0;
-
-        const unitPrice = menuItem.price;
-        subtotal += (unitPrice + addOnTotal) * line.quantity;
-        return { ...line, unitPrice, addOnTotal };
-      }
-    );
-
-    const tax = Number((subtotal * TAX_RATE).toFixed(2));
-    const total = Number((subtotal + tax).toFixed(2));
-    const id = uuid();
-
+    const orderId = uuid();
     const shouldFailPayment = dto.mockPaymentIntent === 'force-fail';
-    const status: OrderStatus = shouldFailPayment ? 'failed' : 'received';
-    const paymentRef = shouldFailPayment ? undefined : `pay_${uuid().slice(0, 8)}`;
+    const now = new Date().toISOString();
 
-    if (!shouldFailPayment) {
-      // reduce stock only on successful payment
-      lines.forEach((line) => this.menu.adjustStock(line.menuItemId, -line.quantity));
-    }
+    const order = await this.prisma.$transaction(async (tx) => {
+      // fetch items
+      const ids = dto.lines.map((l) => l.menuItemId);
+      const menuItems = await tx.menuItem.findMany({ where: { id: { in: ids } } });
+      const itemMap = new Map(menuItems.map((m) => [m.id, m]));
 
-    const order: Order = {
-      id,
-      lines,
-      subtotal: Number(subtotal.toFixed(2)),
-      tax,
-      total,
-      status,
-      createdAt: now,
-      updatedAt: now,
-      customer: dto.customer,
-      version: 1,
-      priceChanged: false,
-      paymentRef
-    };
+      let subtotal = 0;
+      const lines: Array<LineItem & { unitPrice: number; addOnTotal: number }> = dto.lines.map(
+        (line) => {
+          const menuItem = itemMap.get(line.menuItemId);
+          if (!menuItem || !menuItem.available) {
+            throw new BadRequestException(`Item ${line.menuItemId} is unavailable.`);
+          }
+          if (menuItem.stock < line.quantity) {
+            throw new BadRequestException(`Not enough stock for ${menuItem.name}.`);
+          }
+          const addOns = menuItem.addOns ? JSON.parse(menuItem.addOns) : [];
+          const addOnTotal =
+            line.addOnIds?.reduce((acc, id) => {
+              const addOn = addOns.find((a: any) => a.id === id);
+              if (!addOn) throw new BadRequestException(`Invalid add-on ${id} for ${menuItem.name}`);
+              return acc + addOn.price;
+            }, 0) ?? 0;
 
-    this.orders.set(id, order);
-    this.gateway.publish(order);
-    return order;
+          const unitPrice = menuItem.price;
+          subtotal += (unitPrice + addOnTotal) * line.quantity;
+          return { ...line, unitPrice, addOnTotal };
+        }
+      );
+
+      const tax = Number((subtotal * TAX_RATE).toFixed(2));
+      const total = Number((subtotal + tax).toFixed(2));
+
+      if (!shouldFailPayment) {
+        // decrement stock atomically and guard against concurrent depletion
+        for (const line of lines) {
+          const res = await tx.menuItem.updateMany({
+            where: { id: line.menuItemId, stock: { gte: line.quantity } },
+            data: { stock: { decrement: line.quantity } }
+          });
+          if (res.count === 0) {
+            throw new BadRequestException(`Not enough stock for ${line.menuItemId}.`);
+          }
+        }
+      }
+
+      const status: OrderStatus = shouldFailPayment ? 'failed' : 'received';
+      const paymentRef = shouldFailPayment ? undefined : `pay_${uuid().slice(0, 8)}`;
+
+      const created = await tx.order.create({
+        data: {
+          id: orderId,
+          lines: JSON.stringify(lines),
+          subtotal: Number(subtotal.toFixed(2)),
+          tax,
+          total,
+          status,
+          customer: JSON.stringify(dto.customer),
+          paymentRef,
+          version: 1,
+          priceChanged: false
+        }
+      });
+
+      return created;
+    });
+
+    const shaped = this.shapeOrder(order);
+    this.gateway.publish(shaped);
+    return shaped;
   }
 
-  list(): Order[] {
-    return Array.from(this.orders.values()).sort((a, b) =>
-      a.createdAt > b.createdAt ? -1 : 1
-    );
+  async list(): Promise<Order[]> {
+    const orders = await this.prisma.order.findMany({ orderBy: { createdAt: 'desc' } });
+    return orders.map((o) => this.shapeOrder(o));
   }
 
-  get(id: string): Order {
-    const found = this.orders.get(id);
+  async get(id: string): Promise<Order> {
+    const found = await this.prisma.order.findUnique({ where: { id } });
     if (!found) throw new NotFoundException('Order not found');
-    return found;
+    return this.shapeOrder(found);
   }
 
-  updateStatus(id: string, dto: UpdateStatusDto): Order {
-    const current = this.get(id);
-    if (!allowedTransitions[current.status].includes(dto.status)) {
-      throw new BadRequestException(`Cannot transition from ${current.status} to ${dto.status}`);
+  async updateStatus(id: string, dto: UpdateStatusDto): Promise<Order> {
+    const current = await this.prisma.order.findUnique({ where: { id } });
+    if (!current) throw new NotFoundException('Order not found');
+    const shapedCurrent = this.shapeOrder(current);
+    if (!allowedTransitions[shapedCurrent.status].includes(dto.status)) {
+      throw new BadRequestException(
+        `Cannot transition from ${shapedCurrent.status} to ${dto.status}`
+      );
     }
-    const updated: Order = {
-      ...current,
-      status: dto.status,
-      updatedAt: new Date().toISOString(),
-      version: current.version + 1
+    const updated = await this.prisma.order.update({
+      where: { id },
+      data: { status: dto.status, version: shapedCurrent.version + 1 }
+    });
+    const shaped = this.shapeOrder(updated);
+    this.gateway.publish(shaped);
+    return shaped;
+  }
+
+  private shapeOrder(raw: any): Order {
+    return {
+      id: raw.id,
+      status: raw.status,
+      subtotal: raw.subtotal,
+      tax: raw.tax,
+      total: raw.total,
+      customer: JSON.parse(raw.customer ?? '{}'),
+      lines: JSON.parse(raw.lines ?? '[]'),
+      createdAt: raw.createdAt.toISOString?.() ?? raw.createdAt,
+      updatedAt: raw.updatedAt.toISOString?.() ?? raw.updatedAt,
+      version: raw.version,
+      paymentRef: raw.paymentRef,
+      priceChanged: raw.priceChanged
     };
-    this.orders.set(id, updated);
-    this.gateway.publish(updated);
-    return updated;
   }
 }
