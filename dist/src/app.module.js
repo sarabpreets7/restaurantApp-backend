@@ -9,11 +9,12 @@ import { OrdersModule } from './orders/orders.module.js';
 import { MenuModule } from './menu/menu.module.js';
 import { HealthController } from './common/health.controller.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { AuthModule } from './auth/auth.module.js';
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
     Module({
-        imports: [PrismaModule, MenuModule, OrdersModule],
+        imports: [PrismaModule, MenuModule, OrdersModule, AuthModule],
         controllers: [HealthController]
     })
 ], AppModule);

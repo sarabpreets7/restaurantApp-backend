@@ -7,12 +7,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { IsIn, IsString } from 'class-validator';
+import { IsIn, IsString, IsOptional, IsNumber } from 'class-validator';
 export class UpdateStatusDto {
     status;
+    version;
 }
 __decorate([
     IsString(),
     IsIn(['received', 'preparing', 'ready', 'completed', 'failed']),
     __metadata("design:type", String)
 ], UpdateStatusDto.prototype, "status", void 0);
+__decorate([
+    IsOptional(),
+    IsNumber(),
+    __metadata("design:type", Number)
+], UpdateStatusDto.prototype, "version", void 0);

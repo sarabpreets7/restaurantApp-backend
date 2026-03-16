@@ -9,13 +9,14 @@ import { OrdersService } from './orders.service.js';
 import { OrdersController } from './orders.controller.js';
 import { MenuModule } from '../menu/menu.module.js';
 import { OrdersGateway } from './orders.gateway.js';
-import { AdminGuard } from '../common/admin.guard.js';
+import { JwtAdminGuard } from '../common/jwt-admin.guard.js';
+import { AuthService } from '../auth/auth.service.js';
 let OrdersModule = class OrdersModule {
 };
 OrdersModule = __decorate([
     Module({
         imports: [MenuModule],
-        providers: [OrdersService, OrdersGateway, AdminGuard],
+        providers: [OrdersService, OrdersGateway, JwtAdminGuard, AuthService],
         controllers: [OrdersController]
     })
 ], OrdersModule);

@@ -42,6 +42,7 @@ let OrdersService = class OrdersService {
             const menuItems = await tx.menuItem.findMany({ where: { id: { in: ids } } });
             const itemMap = new Map(menuItems.map((m) => [m.id, m]));
             let subtotal = 0;
+            let priceChanged = false;
             const lines = dto.lines.map((line) => {
                 const menuItem = itemMap.get(line.menuItemId);
                 if (!menuItem || !menuItem.available) {
@@ -59,6 +60,8 @@ let OrdersService = class OrdersService {
                 }, 0) ?? 0;
                 const unitPrice = menuItem.price;
                 subtotal += (unitPrice + addOnTotal) * line.quantity;
+                // detect price drift vs any client-provided hint (not provided now, always server truth)
+                priceChanged = priceChanged || false;
                 return { ...line, unitPrice, addOnTotal };
             });
             const tax = Number((subtotal * TAX_RATE).toFixed(2));
@@ -88,7 +91,7 @@ let OrdersService = class OrdersService {
                     customer: JSON.stringify(dto.customer),
                     paymentRef,
                     version: 1,
-                    priceChanged: false
+                    priceChanged
                 }
             });
             return created;
@@ -112,6 +115,9 @@ let OrdersService = class OrdersService {
         if (!current)
             throw new NotFoundException('Order not found');
         const shapedCurrent = this.shapeOrder(current);
+        if (dto.version != null && dto.version !== shapedCurrent.version) {
+            throw new BadRequestException('Version conflict, please refresh');
+        }
         if (!allowedTransitions[shapedCurrent.status].includes(dto.status)) {
             throw new BadRequestException(`Cannot transition from ${shapedCurrent.status} to ${dto.status}`);
         }

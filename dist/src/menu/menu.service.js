@@ -17,7 +17,7 @@ const seedItems = [
         category: 'Appetizers',
         price: 9.5,
         dietary: ['vegetarian'],
-        imageUrl: '/images/truffle-fries.jpg',
+        imageUrl: 'https://images.unsplash.com/photo-1504544750208-dc0358e63f7f?auto=format&fit=crop&w=600&q=80',
         prepMinutes: 10,
         available: true,
         stock: 25,
@@ -29,7 +29,7 @@ const seedItems = [
         category: 'Appetizers',
         price: 12,
         dietary: [],
-        imageUrl: '/images/calamari.jpg',
+        imageUrl: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=600&q=80',
         prepMinutes: 9,
         available: true,
         stock: 18
@@ -40,7 +40,7 @@ const seedItems = [
         category: 'Main Course',
         price: 16,
         dietary: ['vegan', 'gluten-free'],
-        imageUrl: '/images/tofu-bowl.jpg',
+        imageUrl: 'https://images.unsplash.com/photo-1522184216315-dc618e9fbb52?auto=format&fit=crop&w=600&q=80',
         prepMinutes: 18,
         available: true,
         stock: 22
@@ -51,7 +51,7 @@ const seedItems = [
         category: 'Main Course',
         price: 29,
         dietary: [],
-        imageUrl: '/images/ribeye.jpg',
+        imageUrl: 'https://images.unsplash.com/photo-1553163147-622ab57be1c7?auto=format&fit=crop&w=600&q=80',
         prepMinutes: 22,
         available: true,
         stock: 12,
@@ -66,7 +66,7 @@ const seedItems = [
         category: 'Desserts',
         price: 11,
         dietary: ['vegetarian'],
-        imageUrl: '/images/cake.jpg',
+        imageUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80',
         prepMinutes: 12,
         available: true,
         stock: 18
@@ -77,12 +77,21 @@ const seedItems = [
         category: 'Beverages',
         price: 5,
         dietary: ['vegan', 'gluten-free'],
-        imageUrl: '/images/cold-brew.jpg',
+        imageUrl: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=600&q=80',
         prepMinutes: 2,
         available: true,
         stock: 50
     }
 ];
+const imageMap = {
+    'Truffle Fries': 'https://images.unsplash.com/photo-1504544750208-dc0358e63f7f?auto=format&fit=crop&w=600&q=80',
+    'Crispy Calamari': 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=600&q=80',
+    'Smoked Tofu Bowl': 'https://images.unsplash.com/photo-1522184216315-dc618e9fbb52?auto=format&fit=crop&w=600&q=80',
+    'Ribeye Steak': 'https://images.unsplash.com/photo-1553163147-622ab57be1c7?auto=format&fit=crop&w=600&q=80',
+    'Molten Chocolate Cake': 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80',
+    'Cold Brew': 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=600&q=80',
+    'Grilled Salmon': 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=600&q=80'
+};
 let MenuService = class MenuService {
     prisma;
     constructor(prisma) {
@@ -106,6 +115,9 @@ let MenuService = class MenuService {
         return items
             .map((i) => ({
             ...i,
+            imageUrl: !i.imageUrl || i.imageUrl.startsWith('/images')
+                ? imageMap[i.name] ?? 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80'
+                : i.imageUrl,
             dietary: JSON.parse(i.dietary ?? '[]'),
             addOns: i.addOns ? JSON.parse(i.addOns) : []
         }))

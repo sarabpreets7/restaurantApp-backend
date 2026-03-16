@@ -42,4 +42,7 @@ export class CreateOrderDto {
   @IsString()
   @IsOptional()
   mockPaymentIntent?: 'force-fail' | 'force-success';
+
+  @IsOptional()
+  clientPrices?: Array<{ id: string; price: number; stock: number; addOns: any[] }>;
 }

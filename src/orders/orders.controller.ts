@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/co
 import { OrdersService } from './orders.service.js';
 import { CreateOrderDto } from './dto/create-order.dto.js';
 import { UpdateStatusDto } from './dto/update-status.dto.js';
-import { AdminGuard } from '../common/admin.guard.js';
+import { JwtAdminGuard } from '../common/jwt-admin.guard.js';
 
 @Controller('orders')
 export class OrdersController {
@@ -13,7 +13,7 @@ export class OrdersController {
     return this.orders.create(dto);
   }
 
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAdminGuard)
   @Get()
   list() {
     return this.orders.list();
@@ -24,7 +24,7 @@ export class OrdersController {
     return this.orders.get(id);
   }
 
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAdminGuard)
   @Patch(':id/status')
   updateStatus(@Param('id') id: string, @Body() dto: UpdateStatusDto) {
     return this.orders.updateStatus(id, dto);

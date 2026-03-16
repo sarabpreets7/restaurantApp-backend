@@ -13,9 +13,9 @@ async function bootstrap() {
     })
   );
   const port = process.env.PORT ? Number(process.env.PORT) : 4000;
-  await app.listen(port);
+  await app.listen(port, '127.0.0.1');
   // eslint-disable-next-line no-console
-  console.log(`Backend listening on http://localhost:${port}/api`);
+  console.log(`Backend listening on http://127.0.0.1:${port}/api`);
 }
 
 bootstrap();

@@ -14,7 +14,7 @@ import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/co
 import { OrdersService } from './orders.service.js';
 import { CreateOrderDto } from './dto/create-order.dto.js';
 import { UpdateStatusDto } from './dto/update-status.dto.js';
-import { AdminGuard } from '../common/admin.guard.js';
+import { JwtAdminGuard } from '../common/jwt-admin.guard.js';
 let OrdersController = class OrdersController {
     orders;
     constructor(orders) {
@@ -41,7 +41,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], OrdersController.prototype, "create", null);
 __decorate([
-    UseGuards(AdminGuard),
+    UseGuards(JwtAdminGuard),
     Get(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
@@ -55,7 +55,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], OrdersController.prototype, "get", null);
 __decorate([
-    UseGuards(AdminGuard),
+    UseGuards(JwtAdminGuard),
     Patch(':id/status'),
     __param(0, Param('id')),
     __param(1, Body()),

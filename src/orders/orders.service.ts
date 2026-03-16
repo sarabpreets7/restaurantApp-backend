@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid';
 import { MenuService } from '../menu/menu.service.js';
 import { CreateOrderDto } from './dto/create-order.dto.js';
 import { UpdateStatusDto } from './dto/update-status.dto.js';
-import type { Order, OrderStatus, LineItem } from '../common/types.js';
+import type { Order, OrderStatus, LineItem } from '../shared/types.js';
 import { OrdersGateway } from './orders.gateway.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
@@ -40,6 +40,7 @@ export class OrdersService {
       const itemMap = new Map(menuItems.map((m) => [m.id, m]));
 
       let subtotal = 0;
+      let priceChanged = false;
       const lines: Array<LineItem & { unitPrice: number; addOnTotal: number }> = dto.lines.map(
         (line) => {
           const menuItem = itemMap.get(line.menuItemId);
@@ -59,12 +60,20 @@ export class OrdersService {
 
           const unitPrice = menuItem.price;
           subtotal += (unitPrice + addOnTotal) * line.quantity;
+          const clientHint = dto.clientPrices?.find((c) => c.id === menuItem.id);
+          if (clientHint && (clientHint.price !== menuItem.price || clientHint.stock !== menuItem.stock)) {
+            priceChanged = true;
+          }
           return { ...line, unitPrice, addOnTotal };
         }
       );
 
       const tax = Number((subtotal * TAX_RATE).toFixed(2));
       const total = Number((subtotal + tax).toFixed(2));
+
+      if (priceChanged) {
+        throw new BadRequestException('Menu changed since items were added. Please refresh.');
+      }
 
       if (!shouldFailPayment) {
         // decrement stock atomically and guard against concurrent depletion
@@ -93,7 +102,7 @@ export class OrdersService {
           customer: JSON.stringify(dto.customer),
           paymentRef,
           version: 1,
-          priceChanged: false
+          priceChanged
         }
       });
 
@@ -120,6 +129,9 @@ export class OrdersService {
     const current = await this.prisma.order.findUnique({ where: { id } });
     if (!current) throw new NotFoundException('Order not found');
     const shapedCurrent = this.shapeOrder(current);
+    if (dto.version != null && dto.version !== shapedCurrent.version) {
+      throw new BadRequestException('Version conflict, please refresh');
+    }
     if (!allowedTransitions[shapedCurrent.status].includes(dto.status)) {
       throw new BadRequestException(
         `Cannot transition from ${shapedCurrent.status} to ${dto.status}`
