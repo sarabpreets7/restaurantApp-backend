@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { OrdersService } from '../src/orders/orders.service.js';
 import { MenuService } from '../src/menu/menu.service.js';
 class MockPrisma {
@@ -19,8 +20,8 @@ class MockPrisma {
         updateMany: async ({ where: { id }, data }) => {
             const idx = this.menuItems.findIndex((m) => m.id === id);
             const dec = data.stock.decrement;
-            if (idx >= 0 && this.menuItems[idx].stock >= Math.abs(dec)) {
-                this.menuItems[idx].stock += dec;
+            if (idx >= 0 && this.menuItems[idx].stock >= dec) {
+                this.menuItems[idx].stock -= dec;
                 return { count: 1 };
             }
             return { count: 0 };
@@ -28,8 +29,14 @@ class MockPrisma {
     };
     order = {
         create: async ({ data }) => {
-            this.orders.push(data);
-            return data;
+            const withTimestamps = {
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                version: 1,
+                ...data
+            };
+            this.orders.push(withTimestamps);
+            return withTimestamps;
         },
         findMany: async () => this.orders,
         findUnique: async ({ where: { id } }) => this.orders.find((o) => o.id === id),
@@ -37,7 +44,7 @@ class MockPrisma {
             const idx = this.orders.findIndex((o) => o.id === id);
             if (idx >= 0)
                 this.orders[idx] = { ...this.orders[idx], ...data };
-            return this.orders[idx];
+            return { ...this.orders[idx], updatedAt: new Date() };
         }
     };
     async $transaction(cb) {

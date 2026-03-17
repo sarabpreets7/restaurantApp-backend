@@ -1,11 +1,11 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { v4 as uuid } from 'uuid';
-import { MenuService } from '../menu/menu.service';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateStatusDto } from './dto/update-status.dto';
-import type { Order, OrderStatus, LineItem } from '../shared/types';
-import { OrdersGateway } from './orders.gateway';
-import { PrismaService } from '../prisma/prisma.service';
+import { MenuService } from '../menu/menu.service.js';
+import { CreateOrderDto } from './dto/create-order.dto.js';
+import { UpdateStatusDto } from './dto/update-status.dto.js';
+import type { Order, OrderStatus, LineItem } from '../shared/types.js';
+import { OrdersGateway } from './orders.gateway.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 
 const TAX_RATE = 0.09;
 const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
@@ -33,17 +33,17 @@ export class OrdersService {
     const shouldFailPayment = dto.mockPaymentIntent === 'force-fail';
     const now = new Date().toISOString();
 
-    const order = await this.prisma.$transaction(async (tx) => {
+    const order = await this.prisma.$transaction(async (tx: any) => {
       // fetch items
-      const ids = dto.lines.map((l) => l.menuItemId);
+      const ids = dto.lines.map((l: any) => l.menuItemId);
       const menuItems = await tx.menuItem.findMany({ where: { id: { in: ids } } });
-      const itemMap = new Map(menuItems.map((m) => [m.id, m]));
+      const itemMap = new Map(menuItems.map((m: any) => [m.id, m]));
 
       let subtotal = 0;
       let priceChanged = false;
       const lines: Array<LineItem & { unitPrice: number; addOnTotal: number }> = dto.lines.map(
-        (line) => {
-          const menuItem = itemMap.get(line.menuItemId);
+        (line: any) => {
+          const menuItem: any = itemMap.get(line.menuItemId);
           if (!menuItem || !menuItem.available) {
             throw new BadRequestException(`Item ${line.menuItemId} is unavailable.`);
           }
@@ -52,7 +52,7 @@ export class OrdersService {
           }
           const addOns = menuItem.addOns ? JSON.parse(menuItem.addOns) : [];
           const addOnTotal =
-            line.addOnIds?.reduce((acc, id) => {
+            line.addOnIds?.reduce((acc: number, id: string) => {
               const addOn = addOns.find((a: any) => a.id === id);
               if (!addOn) throw new BadRequestException(`Invalid add-on ${id} for ${menuItem.name}`);
               return acc + addOn.price;
@@ -60,7 +60,7 @@ export class OrdersService {
 
           const unitPrice = menuItem.price;
           subtotal += (unitPrice + addOnTotal) * line.quantity;
-          const clientHint = dto.clientPrices?.find((c) => c.id === menuItem.id);
+          const clientHint = dto.clientPrices?.find((c: any) => c.id === menuItem.id);
           if (clientHint && (clientHint.price !== menuItem.price || clientHint.stock !== menuItem.stock)) {
             priceChanged = true;
           }

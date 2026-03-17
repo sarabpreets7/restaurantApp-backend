@@ -123,17 +123,6 @@ const seedItems = [
         stock: 18
     },
     {
-        name: 'Smoked Tofu Bowl',
-        description: 'Brown rice, seasonal veggies, tamari glaze.',
-        category: 'Main Course',
-        price: 16,
-        dietary: ['vegan', 'gluten-free'],
-        imageUrl: 'https://images.unsplash.com/photo-1522184216315-dc618e9fbb52?auto=format&fit=crop&w=600&q=80',
-        prepMinutes: 18,
-        available: true,
-        stock: 22
-    },
-    {
         name: 'Ribeye Steak',
         description: '12oz grilled ribeye with chimichurri.',
         category: 'Main Course',
@@ -147,40 +136,6 @@ const seedItems = [
             { id: 'ao2', label: 'Add mushrooms', price: 3 },
             { id: 'ao3', label: 'Add shrimp', price: 6 }
         ]
-    },
-    {
-        name: 'Margherita Pizza',
-        description: 'San Marzano tomato, fresh mozzarella, basil.',
-        category: 'Main Course',
-        price: 17,
-        dietary: ['vegetarian'],
-        imageUrl: 'https://images.unsplash.com/photo-1548365328-8c6db3220c8e?auto=format&fit=crop&w=600&q=80',
-        prepMinutes: 14,
-        available: true,
-        stock: 20,
-        addOns: [{ id: 'ao4', label: 'Extra buffalo mozzarella', price: 2.5 }]
-    },
-    {
-        name: 'Grilled Salmon',
-        description: 'Charred broccolini, lemon butter, farro.',
-        category: 'Main Course',
-        price: 24,
-        dietary: [],
-        imageUrl: 'https://images.unsplash.com/photo-1514516345957-556ca7d90aaf?auto=format&fit=crop&w=600&q=80',
-        prepMinutes: 16,
-        available: true,
-        stock: 16
-    },
-    {
-        name: 'Mushroom Risotto',
-        description: 'Porcini, pecorino, chive oil.',
-        category: 'Main Course',
-        price: 18,
-        dietary: ['vegetarian', 'gluten-free'],
-        imageUrl: 'https://images.unsplash.com/photo-1612874472278-5c1ef021b6b9?auto=format&fit=crop&w=600&q=80',
-        prepMinutes: 19,
-        available: true,
-        stock: 18
     },
     {
         name: 'Paneer Tikka Wrap',

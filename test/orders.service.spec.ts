@@ -1,7 +1,8 @@
-import { OrdersService } from '../src/orders/orders.service';
-import { MenuService } from '../src/menu/menu.service';
-import { OrdersGateway } from '../src/orders/orders.gateway';
-import { PrismaService } from '../src/prisma/prisma.service';
+import { jest } from '@jest/globals';
+import { OrdersService } from '../src/orders/orders.service.js';
+import { MenuService } from '../src/menu/menu.service.js';
+import { OrdersGateway } from '../src/orders/orders.gateway.js';
+import { PrismaService } from '../src/prisma/prisma.service.js';
 
 class MockPrisma {
   menuItems: any[] = [];
