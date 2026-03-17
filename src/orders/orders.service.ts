@@ -1,11 +1,11 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { v4 as uuid } from 'uuid';
-import { MenuService } from '../menu/menu.service.js';
-import { CreateOrderDto } from './dto/create-order.dto.js';
-import { UpdateStatusDto } from './dto/update-status.dto.js';
-import type { Order, OrderStatus, LineItem } from '../shared/types.js';
-import { OrdersGateway } from './orders.gateway.js';
-import { PrismaService } from '../prisma/prisma.service.js';
+import { MenuService } from '../menu/menu.service';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateStatusDto } from './dto/update-status.dto';
+import type { Order, OrderStatus, LineItem } from '../shared/types';
+import { OrdersGateway } from './orders.gateway';
+import { PrismaService } from '../prisma/prisma.service';
 
 const TAX_RATE = 0.09;
 const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {

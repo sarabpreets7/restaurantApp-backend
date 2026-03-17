@@ -1,7 +1,7 @@
-import { OrdersService } from '../src/orders/orders.service.js';
-import { MenuService } from '../src/menu/menu.service.js';
-import { OrdersGateway } from '../src/orders/orders.gateway.js';
-import { PrismaService } from '../src/prisma/prisma.service.js';
+import { OrdersService } from '../src/orders/orders.service';
+import { MenuService } from '../src/menu/menu.service';
+import { OrdersGateway } from '../src/orders/orders.gateway';
+import { PrismaService } from '../src/prisma/prisma.service';
 
 class MockPrisma {
   menuItems: any[] = [];
@@ -22,8 +22,8 @@ class MockPrisma {
     updateMany: async ({ where: { id }, data }: any) => {
       const idx = this.menuItems.findIndex((m) => m.id === id);
       const dec = data.stock.decrement;
-      if (idx >= 0 && this.menuItems[idx].stock >= Math.abs(dec)) {
-        this.menuItems[idx].stock += dec;
+      if (idx >= 0 && this.menuItems[idx].stock >= dec) {
+        this.menuItems[idx].stock -= dec;
         return { count: 1 };
       }
       return { count: 0 };
@@ -32,15 +32,21 @@ class MockPrisma {
 
   order = {
     create: async ({ data }: any) => {
-      this.orders.push(data);
-      return data;
+      const withTimestamps = {
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        version: 1,
+        ...data
+      };
+      this.orders.push(withTimestamps);
+      return withTimestamps;
     },
     findMany: async () => this.orders,
     findUnique: async ({ where: { id } }: any) => this.orders.find((o) => o.id === id),
     update: async ({ where: { id }, data }: any) => {
       const idx = this.orders.findIndex((o) => o.id === id);
       if (idx >= 0) this.orders[idx] = { ...this.orders[idx], ...data };
-      return this.orders[idx];
+      return { ...this.orders[idx], updatedAt: new Date() };
     }
   };
 
