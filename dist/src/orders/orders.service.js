@@ -60,12 +60,17 @@ let OrdersService = class OrdersService {
                 }, 0) ?? 0;
                 const unitPrice = menuItem.price;
                 subtotal += (unitPrice + addOnTotal) * line.quantity;
-                // detect price drift vs any client-provided hint (not provided now, always server truth)
-                priceChanged = priceChanged || false;
+                const clientHint = dto.clientPrices?.find((c) => c.id === menuItem.id);
+                if (clientHint && (clientHint.price !== menuItem.price || clientHint.stock !== menuItem.stock)) {
+                    priceChanged = true;
+                }
                 return { ...line, unitPrice, addOnTotal };
             });
             const tax = Number((subtotal * TAX_RATE).toFixed(2));
             const total = Number((subtotal + tax).toFixed(2));
+            if (priceChanged) {
+                throw new BadRequestException('Menu changed since items were added. Please refresh.');
+            }
             if (!shouldFailPayment) {
                 // decrement stock atomically and guard against concurrent depletion
                 for (const line of lines) {

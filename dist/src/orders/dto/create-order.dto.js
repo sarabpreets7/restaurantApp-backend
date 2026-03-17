@@ -56,6 +56,7 @@ export class CreateOrderDto {
     lines;
     customer;
     mockPaymentIntent;
+    clientPrices;
 }
 __decorate([
     ValidateNested({ each: true }),
@@ -72,3 +73,7 @@ __decorate([
     IsOptional(),
     __metadata("design:type", String)
 ], CreateOrderDto.prototype, "mockPaymentIntent", void 0);
+__decorate([
+    IsOptional(),
+    __metadata("design:type", Array)
+], CreateOrderDto.prototype, "clientPrices", void 0);

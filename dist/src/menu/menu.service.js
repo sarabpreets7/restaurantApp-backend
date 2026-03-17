@@ -35,6 +35,17 @@ const seedItems = [
         stock: 18
     },
     {
+        name: 'Burrata Plate',
+        description: 'Heirloom tomatoes, basil oil, grilled sourdough.',
+        category: 'Appetizers',
+        price: 14,
+        dietary: ['vegetarian'],
+        imageUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80',
+        prepMinutes: 8,
+        available: true,
+        stock: 18
+    },
+    {
         name: 'Smoked Tofu Bowl',
         description: 'Brown rice, seasonal veggies, tamari glaze.',
         category: 'Main Course',
@@ -61,6 +72,51 @@ const seedItems = [
         ]
     },
     {
+        name: 'Margherita Pizza',
+        description: 'San Marzano tomato, fresh mozzarella, basil.',
+        category: 'Main Course',
+        price: 17,
+        dietary: ['vegetarian'],
+        imageUrl: 'https://images.unsplash.com/photo-1548365328-8c6db3220c8e?auto=format&fit=crop&w=600&q=80',
+        prepMinutes: 14,
+        available: true,
+        stock: 20,
+        addOns: [{ id: 'ao4', label: 'Extra buffalo mozzarella', price: 2.5 }]
+    },
+    {
+        name: 'Grilled Salmon',
+        description: 'Charred broccolini, lemon butter, farro.',
+        category: 'Main Course',
+        price: 24,
+        dietary: [],
+        imageUrl: 'https://images.unsplash.com/photo-1514516345957-556ca7d90aaf?auto=format&fit=crop&w=600&q=80',
+        prepMinutes: 16,
+        available: true,
+        stock: 16
+    },
+    {
+        name: 'Mushroom Risotto',
+        description: 'Porcini, pecorino, chive oil.',
+        category: 'Main Course',
+        price: 18,
+        dietary: ['vegetarian', 'gluten-free'],
+        imageUrl: 'https://images.unsplash.com/photo-1612874472278-5c1ef021b6b9?auto=format&fit=crop&w=600&q=80',
+        prepMinutes: 19,
+        available: true,
+        stock: 18
+    },
+    {
+        name: 'Paneer Tikka Wrap',
+        description: 'Mint chutney, pickled onions, garlic naan.',
+        category: 'Main Course',
+        price: 14,
+        dietary: ['vegetarian'],
+        imageUrl: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=600&q=80',
+        prepMinutes: 12,
+        available: true,
+        stock: 22
+    },
+    {
         name: 'Molten Chocolate Cake',
         description: 'Served warm with vanilla bean gelato.',
         category: 'Desserts',
@@ -72,6 +128,28 @@ const seedItems = [
         stock: 18
     },
     {
+        name: 'Mango Panna Cotta',
+        description: 'Passionfruit coulis, toasted coconut.',
+        category: 'Desserts',
+        price: 9,
+        dietary: ['gluten-free', 'vegetarian'],
+        imageUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80',
+        prepMinutes: 6,
+        available: true,
+        stock: 25
+    },
+    {
+        name: 'Tiramisu Jar',
+        description: 'Espresso-soaked ladyfingers, mascarpone cream.',
+        category: 'Desserts',
+        price: 10,
+        dietary: ['vegetarian'],
+        imageUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80',
+        prepMinutes: 8,
+        available: true,
+        stock: 24
+    },
+    {
         name: 'Cold Brew',
         description: 'Single-origin, slow steeped.',
         category: 'Beverages',
@@ -81,6 +159,28 @@ const seedItems = [
         prepMinutes: 2,
         available: true,
         stock: 50
+    },
+    {
+        name: 'Hibiscus Iced Tea',
+        description: 'Tart, floral, lightly sweetened.',
+        category: 'Beverages',
+        price: 4.5,
+        dietary: ['vegan', 'gluten-free'],
+        imageUrl: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=600&q=80',
+        prepMinutes: 2,
+        available: true,
+        stock: 45
+    },
+    {
+        name: 'Matcha Latte',
+        description: 'Ceremonial grade matcha, oat milk by default.',
+        category: 'Beverages',
+        price: 6,
+        dietary: ['vegan', 'gluten-free'],
+        imageUrl: 'https://images.unsplash.com/photo-1523359346063-d879354c0ea5?auto=format&fit=crop&w=600&q=80',
+        prepMinutes: 3,
+        available: true,
+        stock: 40
     }
 ];
 const imageMap = {
