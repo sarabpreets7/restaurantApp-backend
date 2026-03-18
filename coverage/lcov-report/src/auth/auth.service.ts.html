@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">28.57% </span>
+                <span class="strong">85.71% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>4/14</span>
+                <span class='fraction'>12/14</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/2</span>
+                <span class='fraction'>1/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">33.33% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/3</span>
+                <span class='fraction'>3/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">27.27% </span>
+                <span class="strong">90.9% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>3/11</span>
+                <span class='fraction'>10/11</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -93,26 +93,26 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { Injectable, UnauthorizedException } from '@nestjs/common';
@@ -120,17 +120,17 @@ import jwt from 'jsonwebtoken';
 &nbsp;
 @Injectable()
 export class AuthService {
-<span class="fstat-no" title="function not covered" >  issueAdminToken(</span>secret: string, password: string): { token: string } {
-<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (!secret) <span class="cstat-no" title="statement not covered" >throw new UnauthorizedException('Server misconfigured');</span></span>
-<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (password !== secret) <span class="cstat-no" title="statement not covered" >throw new UnauthorizedException('Invalid credentials');</span></span>
-    const token = <span class="cstat-no" title="statement not covered" >jwt.sign({ role: 'admin' }, secret, { expiresIn: '8h' });</span>
-<span class="cstat-no" title="statement not covered" >    return { token };</span>
+  issueAdminToken(secret: string, password: string): { token: string } {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (!secret) <span class="cstat-no" title="statement not covered" >throw new UnauthorizedException('Server misconfigured');</span>
+    if (password !== secret) throw new UnauthorizedException('Invalid credentials');
+    const token = jwt.sign({ role: 'admin' }, secret, { expiresIn: '8h' });
+    return { token };
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  verify(</span>token: string, secret: string): boolean {
-<span class="cstat-no" title="statement not covered" >    try {</span>
-      const decoded = <span class="cstat-no" title="statement not covered" >jwt.verify(token, secret) as any;</span>
-<span class="cstat-no" title="statement not covered" >      return decoded.role === 'admin';</span>
+  verify(token: string, secret: string): boolean {
+    try {
+      const decoded = jwt.verify(token, secret) as any;
+      return decoded.role === 'admin';
     } catch {
 <span class="cstat-no" title="statement not covered" >      return false;</span>
     }
@@ -148,7 +148,7 @@ export class AuthService {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-17T16:26:33.883Z
+                at 2026-03-18T05:05:41.674Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

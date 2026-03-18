@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">25% </span>
+                <span class="strong">83.33% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>3/12</span>
+                <span class='fraction'>10/12</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">30% </span>
+                <span class="strong">70% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>3/10</span>
+                <span class='fraction'>7/10</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/2</span>
+                <span class='fraction'>2/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">22.22% </span>
+                <span class="strong">88.88% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>2/9</span>
+                <span class='fraction'>8/9</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -84,16 +84,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -104,13 +104,13 @@ import { AuthService } from '../auth/auth.service.js';
 export class JwtAdminGuard implements CanActivate {
   constructor(private readonly auth: AuthService<span class="branch-1 cbranch-no" title="branch not covered" >) {}</span>
 &nbsp;
-<span class="fstat-no" title="function not covered" >  canActivate(</span>context: ExecutionContext): boolean {
-    const req = <span class="cstat-no" title="statement not covered" >context.switchToHttp().getRequest();</span>
-    const header = <span class="cstat-no" title="statement not covered" >req.headers['authorization'] as string | undefined;</span>
-    const secret = <span class="cstat-no" title="statement not covered" >process.env.ADMIN_TOKEN;</span>
-<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (!secret) <span class="cstat-no" title="statement not covered" >throw new UnauthorizedException('Admin auth not configured');</span></span>
-    const token = <span class="cstat-no" title="statement not covered" >header?.startsWith('Bearer ') ? header.slice(7) : undefined;</span>
-<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (token &amp;&amp; this.auth.verify(token, secret)) <span class="cstat-no" title="statement not covered" >return true;</span></span>
+  canActivate(context: ExecutionContext): boolean {
+    const req = context.switchToHttp().getRequest();
+    const header = req.headers['authorization'] as string | undefined;
+    const secret = process.env.ADMIN_TOKEN;
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (!secret) <span class="cstat-no" title="statement not covered" >throw new UnauthorizedException('Admin auth not configured');</span>
+    const token = header?.startsWith('Bearer ') ? header.slice(7) : <span class="branch-1 cbranch-no" title="branch not covered" >undefined;</span>
+    if (token &amp;&amp; this.auth.verify(token, secret)) return true;
 <span class="cstat-no" title="statement not covered" >    throw new UnauthorizedException('Invalid admin token');</span>
   }
 }
@@ -121,7 +121,7 @@ export class JwtAdminGuard implements CanActivate {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-17T16:26:33.883Z
+                at 2026-03-18T05:05:41.674Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
