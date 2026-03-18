@@ -579,7 +579,7 @@ const imageMap: Record<string, string> = {
   'Crispy Calamari':
     'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=600&q=80',
   'Smoked Tofu Bowl':
-    'https://images.unsplash.com/photo-1522184216315-dc618e9fbb52?auto=format&fit=crop&w=600&q=80',
+    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRnYocb2iVRiu8WjbFFgHZsm2eSkrxlHLq4Ug&s',
   'Ribeye Steak':
     'https://images.unsplash.com/photo-1553163147-622ab57be1c7?auto=format&fit=crop&w=600&q=80',
   'Molten Chocolate Cake':
@@ -587,7 +587,7 @@ const imageMap: Record<string, string> = {
   'Cold Brew':
     'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=600&q=80',
   'Grilled Salmon':
-    'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=600&q=80'
+    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJy7e7FNp7D3XHt8SSWKZyej_gLn9u60YFFQ&s'
 };
 
 @Injectable()
